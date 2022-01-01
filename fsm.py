@@ -16,6 +16,8 @@ from linebot.exceptions import InvalidSignatureError
 from linebot.models import *
 class TocMachine(GraphMachine):
     picture_id = []
+    picture_num = 0
+    temp = ''
     def __init__(self, **machine_configs):
         self.machine = GraphMachine(model=self, **machine_configs)
 
@@ -25,6 +27,21 @@ class TocMachine(GraphMachine):
     def is_going_to_state5(self, event):
         text = event.message.text
         return text.lower() == "刪"
+
+    def is_going_to_state6(self, event):#add
+        text = event.message.text
+        if len(text) <= 10 and len(text) >= 8:
+            self.temp = text
+            return True
+        return False
+    def is_going_to_state7(self, event):#delete
+        text = event.message.text
+        if len(text) <= 10 and len(text) >= 8:
+            self.temp = text
+            return True
+        return False
+
+
 
     def is_going_to_state2(self, event):
         text = event.message.text
@@ -41,26 +58,68 @@ class TocMachine(GraphMachine):
         print("I'm entering state1")
 
         reply_token = event.reply_token
-        send_text_message(reply_token, "Trigger state1")
+        send_text_message(reply_token, "請問要加入的圖片的id?")
+
+    def on_enter_state6(self, event):
+        print("I'm entering state6")
+        o = open('mypicture.json')
+        data2 = json.load(o)
+        data2.setdefault(str(self.picture_num+1),self.temp)
+        o.close()
+        with open('mypicture.json', 'w', encoding='utf-8') as f:
+            json.dump(data2, f, ensure_ascii=False, indent=4)
+        self.picture_num += 1
+        reply_token = event.reply_token
+        send_text_message(reply_token, "加入成功")#"加入成功"
+        self.temp = ''
         self.go_back()
 
-    def on_exit_state1(self):
-        print("Leaving state1")
+    def on_exit_state6(self):
+        print("Leaving state6")
+
+    def on_enter_state7(self, event):
+        print("I'm entering state6")
+        o = open('mypicture.json')
+        data2 = json.load(o)
+        t = 0
+        for i in range(len(data2)):
+            if str(data2[str(i+1)]) == self.temp:
+                t = i
+        for i in range(len(data2)+1):
+            if i > t+1:
+                data2[str(i-1)] = data2.pop(str(i))
+            elif i == t+1:
+                data2.pop(str(i))
+        o.close()
+        with open('mypicture.json', 'w', encoding='utf-8') as f:
+            json.dump(data2, f, ensure_ascii=False, indent=4)
+        reply_token = event.reply_token
+        send_text_message(reply_token, "刪除成功")
+        self.picture_num -= 1
+        self.go_back()
+
+    def on_exit_state7(self):
+        print("Leaving state7")
+
     def on_enter_state5(self, event):
         print("I'm entering state5")
 
         reply_token = event.reply_token
-        send_text_message(reply_token, "Trigger state5")
-        self.go_back()
-
-    def on_exit_state5(self):
-        print("Leaving state5")
+        send_text_message(reply_token, "請問要刪除的圖片的id?")
 
     def on_enter_state2(self, event):
         print("I'm entering state2")
 
         reply_token = event.reply_token
-        send_text_message(reply_token, "Trigger state2")
+        o = open('mypicture.json')
+        data2 = json.load(o)
+        o.close()
+        #global picture_num 
+        self.picture_num = len(data2)
+        output = 'picture list\n'
+        for i in data2.items():
+            output = output + str(i[1]) + "\n"
+        send_text_message(reply_token, output)
         #self.state2to1()
 
     #def on_exit_state2(self):
