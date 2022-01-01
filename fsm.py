@@ -4,7 +4,7 @@ from utils import send_text_message, send_button_message
 import utils
 import os
 import sys
-from bs4 import BeautifulSoup
+#from bs4 import BeautifulSoup
 import json
 import requests
 import random
