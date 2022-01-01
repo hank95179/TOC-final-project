@@ -1,10 +1,6 @@
 import os
-import sys
 
-from flask import Flask, jsonify, request, abort, send_file
-from dotenv import load_dotenv
 from linebot import LineBotApi, WebhookParser
-from linebot.exceptions import InvalidSignatureError
 from linebot.models import *
 
 
@@ -17,11 +13,21 @@ def send_text_message(reply_token, text):
 
     return "OK"
 
-
 """
 def send_image_url(id, img_url):
     pass
-
-def send_button_message(id, text, buttons):
-    pass
 """
+def send_button_message(reply_token, title, text, btn, urls):
+    line_bot_api = LineBotApi(channel_access_token)
+    message = TemplateSendMessage(
+        alt_text='button template',
+        template = ButtonsTemplate(
+            title = title,
+            text = text,
+            thumbnail_image_url = urls,
+            actions = btn
+        )
+    )
+    line_bot_api.reply_message(reply_token, message)
+
+    return "OK"

@@ -14,7 +14,7 @@ load_dotenv()
 
 
 machine = TocMachine(
-    states=["user", "state1", "state2" , "state3", "state4", "state5", "state6", "state7"],
+    states=["user", "state1", "state2" , "state3", "state4", "state5", "state6", "state7", "state8", "state9","state10","state11"],
     transitions=[
         {
             "trigger": "advance",
@@ -27,6 +27,18 @@ machine = TocMachine(
             "source": "user",
             "dest": "state3",
             "conditions": "is_going_to_state3",
+        },
+        {
+            "trigger": "advance",
+            "source": "user",
+            "dest": "state11",
+            "conditions": "is_going_to_state11",
+        },
+        {
+            "trigger": "advance",
+            "source": "user",
+            "dest": "state10",
+            "conditions": "is_going_to_state10",
         },
         {
             "trigger": "advance",
@@ -58,7 +70,19 @@ machine = TocMachine(
             "dest": "state7",
             "conditions": "is_going_to_state7",
         },
-        {"trigger": "go_back", "source": ["state7", "state4", "state6"], "dest": "user"},
+        {
+            "trigger": "advance",
+            "source": "user",
+            "dest": "state8",
+            "conditions": "is_going_to_state8",
+        },
+        {
+            "trigger": "advance",
+            "source": "state8",
+            "dest": "state9",
+            "conditions": "is_going_to_state9",
+        },
+        {"trigger": "go_back", "source": ["state7", "state4", "state6", "state9", "state10", "state11"], "dest": "user"},
     ],
     initial="user",
     auto_transitions=False,
@@ -134,11 +158,13 @@ def webhook_handler():
         print(f"REQUEST BODY: \n{body}")
         response = machine.advance(event)
         if response == False:
-            message = ImageSendMessage(
-            original_content_url='https://c.tenor.com/_4a8p_PLnhwAAAAC/%E7%AA%A9%E4%B8%8D%E7%9F%A5%E9%81%93.gif?fbclid=IwAR0tX9cZtruLmd4yZDxpM7D5z_sqooNmtXDqLPquzSO1pexy2bmRixIQGQo',
-            preview_image_url='https://c.tenor.com/_4a8p_PLnhwAAAAC/%E7%AA%A9%E4%B8%8D%E7%9F%A5%E9%81%93.gif?fbclid=IwAR0tX9cZtruLmd4yZDxpM7D5z_sqooNmtXDqLPquzSO1pexy2bmRixIQGQo'
-            )
-            line_bot_api.reply_message(event.reply_token, message)
+            #message = ImageSendMessage(
+            #original_content_url='https://c.tenor.com/_4a8p_PLnhwAAAAC/%E7%AA%A9%E4%B8%8D%E7%9F%A5%E9%81%93.gif?fbclid=IwAR0tX9cZtruLmd4yZDxpM7D5z_sqooNmtXDqLPquzSO1pexy2bmRixIQGQo',
+            #preview_image_url='https://c.tenor.com/_4a8p_PLnhwAAAAC/%E7%AA%A9%E4%B8%8D%E7%9F%A5%E9%81%93.gif?fbclid=IwAR0tX9cZtruLmd4yZDxpM7D5z_sqooNmtXDqLPquzSO1pexy2bmRixIQGQo'
+            #)
+            mes = '指令錯誤 ! 請輸入「幫助」來了解更多訊息'
+            #line_bot_api.reply_message(event.reply_token, message)
+            send_text_message(event.reply_token, mes)
 
     return "OK"
 

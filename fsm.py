@@ -1,6 +1,6 @@
 from transitions.extensions import GraphMachine
 
-from utils import send_text_message
+from utils import send_text_message, send_button_message
 import utils
 import os
 import sys
@@ -24,6 +24,12 @@ class TocMachine(GraphMachine):
     def is_going_to_state1(self, event):
         text = event.message.text
         return text.lower() == "加"
+    def is_going_to_state11(self, event):
+        text = event.message.text
+        return text.lower() == "幫助"
+    def is_going_to_state8(self, event):
+        text = event.message.text
+        return text.lower() == "查詢"
     def is_going_to_state5(self, event):
         text = event.message.text
         return text.lower() == "刪"
@@ -40,12 +46,20 @@ class TocMachine(GraphMachine):
             self.temp = text
             return True
         return False
+    def is_going_to_state9(self, event):#delete
+        text = event.message.text
+        if len(text) <= 10 and len(text) >= 8:
+            self.temp = text
+            return True
+        return False
 
 
-
-    def is_going_to_state2(self, event):
+    def is_going_to_state10(self, event):
         text = event.message.text
         return text.lower() == "我的油圖"
+    def is_going_to_state2(self, event):
+        text = event.message.text
+        return text.lower() == "編輯我的油圖"
 
     def is_going_to_state3(self, event):
         text = event.message.text
@@ -59,6 +73,41 @@ class TocMachine(GraphMachine):
 
         reply_token = event.reply_token
         send_text_message(reply_token, "請問要加入的圖片的id?")
+    def on_enter_state11(self, event):
+        print("I'm entering state11")
+
+        reply_token = event.reply_token
+        title = '請問需要的服務'
+        text = '今日油圖為當日Pixiv隨機排行前三\n今日油圖結束後輸入「id」可回到原狀態'
+        btn = [
+            MessageTemplateAction(
+                label = '我的油圖',
+                text ='我的油圖'
+            ),
+            MessageTemplateAction(
+                label = '編輯我的油圖',
+                text = '編輯我的油圖'
+            ),
+            MessageTemplateAction(
+                label = '今日油圖',
+                text = '今日油圖'
+            ),
+            MessageTemplateAction(
+                label = '查詢油圖',
+                text = '查詢'
+            ),
+        ]
+        url = 'https://upload.wikimedia.org/wikipedia/commons/7/73/Pixiv_logo.svg'
+        send_button_message(reply_token, title, text, btn, url)
+        self.go_back()
+
+    def on_exit_state11(self):
+        print("Leaving state11")
+    def on_enter_state8(self, event):
+        print("I'm entering state1")
+
+        reply_token = event.reply_token
+        send_text_message(reply_token, "請問要查詢的圖片的id?")
 
     def on_enter_state6(self, event):
         print("I'm entering state6")
@@ -119,11 +168,38 @@ class TocMachine(GraphMachine):
         output = 'picture list\n'
         for i in data2.items():
             output = output + str(i[1]) + "\n"
-        send_text_message(reply_token, output)
+        title = 'picture list'
+        text = output
+        btn = [
+            MessageTemplateAction(
+                label = '刪除',
+                text ='刪'
+            ),
+            MessageTemplateAction(
+                label = '加入',
+                text = '加'
+            ),
+        ]
+        url = 'https://upload.wikimedia.org/wikipedia/commons/7/73/Pixiv_logo.svg'
+        send_button_message(reply_token, title, text, btn, url)
+        #send_text_message(reply_token, output)
         #self.state2to1()
+    def on_enter_state10(self, event):
+        print("I'm entering state10")
 
-    #def on_exit_state2(self):
-        #print("Leaving state2")
+        reply_token = event.reply_token
+        o = open('mypicture.json')
+        data2 = json.load(o)
+        o.close()
+        #global picture_num 
+        self.picture_num = len(data2)
+        output = 'picture list\n'
+        for i in data2.items():
+            output = output + str(i[1]) + "\n"
+        send_text_message(reply_token, output)
+        self.go_back()
+    def on_exit_state10(self):
+        print("Leaving state10")
     def on_enter_state3(self, event):
         channel_access_token = os.getenv("LINE_CHANNEL_ACCESS_TOKEN", None)
         line_bot_api = LineBotApi(channel_access_token)
@@ -150,7 +226,19 @@ class TocMachine(GraphMachine):
         preview_image_url=mes
         )
         line_bot_api.reply_message(event.reply_token, message)
-
+    def on_enter_state9(self, event):
+        channel_access_token = os.getenv("LINE_CHANNEL_ACCESS_TOKEN", None)
+        line_bot_api = LineBotApi(channel_access_token)
+        print("I'm entering state9")
+        mes = "https://www.pixiv.cat/" + str(self.temp) + ".jpg"
+        message = ImageSendMessage(
+        original_content_url=mes,
+        preview_image_url=mes
+        )
+        line_bot_api.reply_message(event.reply_token, message)
+        self.go_back()
+    def on_exit_state9(self):
+        print("Leaving state4")
     def on_enter_state4(self, event):
         print("I'm entering state4")
 
