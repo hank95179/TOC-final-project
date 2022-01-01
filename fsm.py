@@ -78,7 +78,7 @@ class TocMachine(GraphMachine):
 
         reply_token = event.reply_token
         title = '請問需要的服務'
-        text = '今日油圖為當日Pixiv排行前三隨機\n今日油圖結束後輸入「id」回到原狀態'
+        text = '今日油圖為當日Pixiv隨機排行前三\n今日油圖結束後輸入「id」回到原狀態'
         btn = [
             MessageTemplateAction(
                 label = '我的油圖',
