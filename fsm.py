@@ -207,6 +207,7 @@ class TocMachine(GraphMachine):
         response = requests.get(
             "https://www.pixiv.net/ranking.php?p=1&format=json")
         soup = BeautifulSoup(response.text, "html.parser")
+        """
         j = json.loads(str(soup))
         k = j['contents']
         t = random.randint(0,2)
@@ -221,6 +222,8 @@ class TocMachine(GraphMachine):
         else:
             mes = "https://www.pixiv.cat/" + uid + "-1.jpg"
             self.picture_id.append(uid+"-1")
+        """
+        mes = 'https://upload.wikimedia.org/wikipedia/commons/7/73/Pixiv_logo.svg'
         message = ImageSendMessage(
         original_content_url=mes,
         preview_image_url=mes
