@@ -5,7 +5,7 @@ from flask import Flask, jsonify, request, abort, send_file
 from dotenv import load_dotenv
 from linebot import LineBotApi, WebhookParser
 from linebot.exceptions import InvalidSignatureError
-from linebot.models import MessageEvent, TextMessage, TextSendMessage
+from linebot.models import *
 
 from fsm import TocMachine
 from utils import send_text_message
@@ -14,21 +14,39 @@ load_dotenv()
 
 
 machine = TocMachine(
-    states=["user", "state1", "state2"],
+    states=["user", "state1", "state2" , "state3", "state4", "state5"],
     transitions=[
-        {
-            "trigger": "advance",
-            "source": "user",
-            "dest": "state1",
-            "conditions": "is_going_to_state1",
-        },
         {
             "trigger": "advance",
             "source": "user",
             "dest": "state2",
             "conditions": "is_going_to_state2",
         },
-        {"trigger": "go_back", "source": ["state1", "state2"], "dest": "user"},
+        {
+            "trigger": "advance",
+            "source": "user",
+            "dest": "state3",
+            "conditions": "is_going_to_state3",
+        },
+        {
+            "trigger": "advance",
+            "source": "state2",
+            "dest": "state1",
+            "conditions": "is_going_to_state1",
+        },
+        {
+            "trigger": "advance",
+            "source": "state2",
+            "dest": "state5",
+            "conditions": "is_going_to_state5",
+        },
+        {
+            "trigger": "advance",
+            "source": "state3",
+            "dest": "state4",
+            "conditions": "is_going_to_state4",
+        },
+        {"trigger": "go_back", "source": ["state1", "state4", "state5"], "dest": "user"},
     ],
     initial="user",
     auto_transitions=False,
@@ -104,7 +122,12 @@ def webhook_handler():
         print(f"REQUEST BODY: \n{body}")
         response = machine.advance(event)
         if response == False:
-            send_text_message(event.reply_token, "Not Entering any State")
+            message = ImageSendMessage(
+            original_content_url='https://c.tenor.com/_4a8p_PLnhwAAAAC/%E7%AA%A9%E4%B8%8D%E7%9F%A5%E9%81%93.gif?fbclid=IwAR0tX9cZtruLmd4yZDxpM7D5z_sqooNmtXDqLPquzSO1pexy2bmRixIQGQo',
+            preview_image_url='https://c.tenor.com/_4a8p_PLnhwAAAAC/%E7%AA%A9%E4%B8%8D%E7%9F%A5%E9%81%93.gif?fbclid=IwAR0tX9cZtruLmd4yZDxpM7D5z_sqooNmtXDqLPquzSO1pexy2bmRixIQGQo'
+            )
+            line_bot_api.reply_message(event.reply_token, message)
+
     return "OK"
 
 
