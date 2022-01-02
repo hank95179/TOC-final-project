@@ -219,7 +219,8 @@ class TocMachine(GraphMachine):
             mes = "https://www.pixiv.cat/" + uid + ".jpg"
             self.picture_id.append(uid)
         else:
-            mes = "https://www.pixiv.cat/" + uid + "-1.jpg"
+            page = random.randint(1,paintcount)
+            mes = "https://www.pixiv.cat/" + uid + "-"+str(page)+".jpg"
             self.picture_id.append(uid+"-1")
         message = ImageSendMessage(
         original_content_url=mes,
